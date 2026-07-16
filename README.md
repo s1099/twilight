@@ -3,6 +3,9 @@
 [![codecov badge][]][codecov link] [![discord badge][]][discord link] [![github badge][]][github link] [![license badge][]][license link] ![rust badge]
 
 ![project logo][logo]
+---
+This fork adds support for user accounts by not adding `Bot ` to the supplied token.
+---
 
 `twilight` is a powerful, flexible, and scalable ecosystem of Rust libraries
 for the Discord API.
