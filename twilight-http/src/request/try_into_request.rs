@@ -69,7 +69,7 @@ mod private {
                 CreateAutoModerationRule, DeleteAutoModerationRule, GetAutoModerationRule,
                 GetGuildAutoModerationRules, UpdateAutoModerationRule,
             },
-            ban::{CreateBan, DeleteBan, GetBan, GetBans},
+            ban::{BulkGuildBan, CreateBan, DeleteBan, GetBan, GetBans},
             emoji::{CreateEmoji, DeleteEmoji, GetEmoji, GetEmojis, UpdateEmoji},
             integration::{DeleteGuildIntegration, GetGuildIntegrations},
             member::{
@@ -96,7 +96,7 @@ mod private {
             CreateGuildVoiceScheduledEvent, DeleteGuildScheduledEvent, GetGuildScheduledEvent,
             GetGuildScheduledEventUsers, GetGuildScheduledEvents, UpdateGuildScheduledEvent,
         },
-        sticker::{GetNitroStickerPacks, GetSticker},
+        sticker::{GetNitroStickerPacks, GetSticker, GetStickerPack},
         template::{
             CreateGuildFromTemplate, CreateTemplate, DeleteTemplate, GetTemplate, GetTemplates,
             SyncTemplate, UpdateTemplate,
@@ -115,6 +115,7 @@ mod private {
     impl Sealed for AddGuildMember<'_> {}
     impl Sealed for AddRoleToMember<'_> {}
     impl Sealed for AddThreadMember<'_> {}
+    impl Sealed for BulkGuildBan<'_> {}
     impl Sealed for ConsumeEntitlement<'_> {}
     impl Sealed for CreateAutoModerationRule<'_> {}
     impl Sealed for CreateBan<'_> {}
@@ -253,6 +254,7 @@ mod private {
     impl Sealed for GetSKUSubscriptions<'_> {}
     impl Sealed for GetSKUSubscription<'_> {}
     impl Sealed for GetStageInstance<'_> {}
+    impl Sealed for GetStickerPack<'_> {}
     impl Sealed for GetSticker<'_> {}
     impl Sealed for GetTemplate<'_> {}
     impl Sealed for GetTemplates<'_> {}

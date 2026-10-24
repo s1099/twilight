@@ -39,6 +39,10 @@ pub enum Route<'a> {
         /// ID of the member.
         user_id: u64,
     },
+    /// Route information to ban users from a guild in bulk.
+    BulkGuildBan {
+        guild_id: u64,
+    },
     /// Mark a given One-Time Purchase consumable SKU for a given entitlement
     /// for the user as consumed.
     ConsumeEntitlement {
@@ -747,6 +751,9 @@ pub enum Route<'a> {
         guild_id: u64,
     },
     /// Route information to get a paginated list of guilds.
+    ///
+    /// If the application uses Large Bot Sharding then the `shard` field is
+    /// required.
     GetGuilds {
         /// The minimum ID of guilds to get.
         after: Option<u64>,
@@ -754,6 +761,12 @@ pub enum Route<'a> {
         before: Option<u64>,
         /// The maximum number of guilds to get.
         limit: Option<u16>,
+        /// Set the shard to return guilds for. Mandatory for applications using
+        /// Large Bot Sharding.
+        ///
+        /// This is a value of 0 to `max_concurrency` - 1. By default this
+        /// parameter is absent.
+        shard: Option<u64>,
     },
     /// Route information to get an original interaction response message.
     GetInteractionOriginal {
@@ -893,6 +906,11 @@ pub enum Route<'a> {
     GetStageInstance {
         /// ID of the stage channel.
         channel_id: u64,
+    },
+    /// Route information to get a sticker pack.
+    GetStickerPack {
+        /// ID of the sticker pack.
+        sticker_pack_id: u64,
     },
     /// Route information to get a sticker.
     GetSticker {
@@ -1373,6 +1391,7 @@ impl Route<'_> {
             | Self::GetSKUSubscriptions { .. }
             | Self::GetSKUSubscription { .. }
             | Self::GetStageInstance { .. }
+            | Self::GetStickerPack { .. }
             | Self::GetSticker { .. }
             | Self::GetTemplate { .. }
             | Self::GetTemplates { .. }
@@ -1417,6 +1436,7 @@ impl Route<'_> {
             | Self::UpdateWebhook { .. } => Method::Patch,
             Self::CreateChannel { .. }
             | Self::AddApplicationEmoji { .. }
+            | Self::BulkGuildBan { .. }
             | Self::ConsumeEntitlement { .. }
             | Self::CreateGlobalCommand { .. }
             | Self::CreateGuildCommand { .. }
@@ -1552,6 +1572,12 @@ impl Display for Route<'_> {
                 f.write_str("/thread-members/")?;
 
                 Display::fmt(user_id, f)
+            }
+            Route::BulkGuildBan { guild_id } => {
+                f.write_str("guilds/")?;
+                Display::fmt(guild_id, f)?;
+
+                f.write_str("/bulk-ban")
             }
             Route::ConsumeEntitlement {
                 application_id,
@@ -2509,6 +2535,7 @@ impl Display for Route<'_> {
                 after,
                 before,
                 limit,
+                shard,
             } => {
                 f.write_str("users/@me/guilds")?;
 
@@ -2516,7 +2543,8 @@ impl Display for Route<'_> {
 
                 query_formatter.write_opt_param("after", after.as_ref())?;
                 query_formatter.write_opt_param("before", before.as_ref())?;
-                query_formatter.write_opt_param("limit", limit.as_ref())
+                query_formatter.write_opt_param("limit", limit.as_ref())?;
+                query_formatter.write_opt_param("shard", shard.as_ref())
             }
             Route::GetInvite { code, with_counts } => {
                 f.write_str("invites/")?;
@@ -2646,6 +2674,11 @@ impl Display for Route<'_> {
                 query_formatter.write_opt_param("after", after.as_ref())?;
                 query_formatter.write_opt_param("limit", limit.as_ref())?;
                 query_formatter.write_opt_param("type", kind.as_ref())
+            }
+            Route::GetStickerPack { sticker_pack_id } => {
+                f.write_str("sticker-packs/")?;
+
+                Display::fmt(sticker_pack_id, f)
             }
             Route::GetSticker { sticker_id } => {
                 f.write_str("stickers/")?;
@@ -2890,6 +2923,7 @@ mod tests {
     const USER_ID: u64 = 11;
     const SCHEDULED_EVENT_ID: u64 = 12;
     const AUTO_MODERATION_RULE_ID: u64 = 13;
+    const STICKER_PACK_ID: u64 = 14;
     const SKU_ID: u64 = 15;
     const SUBSCRIPTION_ID: u64 = 16;
     const ENTITLEMENT_ID: u64 = 17;
@@ -4141,6 +4175,18 @@ mod tests {
         assert_eq!(
             route.to_string(),
             format!("channels/{CHANNEL_ID}/messages/pins")
+        );
+    }
+
+    #[test]
+    fn get_sticker_pack() {
+        let route = Route::GetStickerPack {
+            sticker_pack_id: STICKER_PACK_ID,
+        };
+        assert_eq!(Method::Get, route.method());
+        assert_eq!(
+            route.to_string(),
+            format!("sticker-packs/{STICKER_PACK_ID}")
         );
     }
 
